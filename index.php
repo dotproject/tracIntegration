@@ -1,4 +1,4 @@
-<?php /* TRAC $Id$ */
+<?php /* TRAC $Id: index.php,v 1.2 2008/04/23 13:09:44 david_iondev Exp $ */
 /**
  * Trac integration for dotProject
  *
@@ -7,6 +7,12 @@
  * @version 0.3-rc1
  * @copyright ION Development (www.iongroup.lu)
  * @license http://www.gnu.org/copyleft/gpl.html GPL License 2 or later
+ * @todo 
+ *	Add projects, tasks module integration
+ * 		i.e. allow to link to specific trac environments/tickets from within projects/tasks
+ * 	Add environment generation by project adding (tick case -> add as trac environment)
+ *		--> (difficult, projects.addedit doesn't have any tabs)
+ * 	Preserve states (urls) between tab switches
  */
 
 if (!defined('DP_BASE_DIR')){
