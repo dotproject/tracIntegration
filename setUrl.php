@@ -4,15 +4,26 @@
  *
  * @author David Raison <david@ion.lu>
  * @package dpTrac
- * @version 0.2
+ * @version 0.3-rc1
  * @copyright ION Development (www.iongroup.lu)
  * @license http://www.gnu.org/copyleft/gpl.html GPL License 2 or later
  */
 
+if (!defined('DP_BASE_DIR')){
+        die('You should not access this file directly.');
+}
+
+// Checking permissions
+$perms =& $AppUI->acl();
+$canEdit = $perms->checkModule( $m, 'edit');
+if (!$canEdit) {
+        $AppUI->redirect( "m=public&a=access_denied" );
+}  
+
 $AppUI->savePlace();
 $titleBlock = new CTitleBlock( 'Trac', 'trac_logo.png', $m, "$m.$a" );
-$titleBlock->addCrumb('?m=trac&a=index',$AppUI->_('Environments'));
-$titleBlock->addCrumb('?m=trac&a=addEnv',$AppUI->_('Add Trac Environment'));
+$titleBlock->addCrumb('?m=trac&a=index',$AppUI->_('List Environments'));
+$titleBlock->addCrumb('?m=trac&a=addEnv',$AppUI->_('Manage Trac Environments'));
 $titleBlock->show();
 $tracpr = new CTracProj();
 

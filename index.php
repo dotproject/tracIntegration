@@ -1,18 +1,38 @@
-<?php
+<?php /* TRAC $Id$ */
 /**
  * Trac integration for dotProject
  *
  * @author David Raison <david@ion.lu>
  * @package dpTrac
- * @version 0.2
+ * @version 0.3-rc1
  * @copyright ION Development (www.iongroup.lu)
  * @license http://www.gnu.org/copyleft/gpl.html GPL License 2 or later
  */
 
+if (!defined('DP_BASE_DIR')){
+	die('You should not access this file directly.');
+}
+
+/** Some notes for the dev, please don't mind this for the time being 
+var_dump($AppUI->user_id);	
+var_dump($perms->getPermittedUsers("trac"));	
+$canEdit = $perms->checkModuleItem( $m, 'edit', $moditem );
+*/
+
+// Checking permissions
+$perms =& $AppUI->acl();
+$canRead = $perms->checkModule( $m, 'view');
+$canEdit = $perms->checkModule( $m, 'edit');
+$canAdd = $perms->checkModule( $m, 'add');
+$canDelete = $perms->checkModule( $m, 'delete');
+if (!$canRead) {
+	$AppUI->redirect( "m=public&a=access_denied" );
+}
+
 $AppUI->savePlace();
 $titleBlock = new CTitleBlock( 'Trac', 'trac_logo.png', $m, "$m.$a" );
-$titleBlock->addCrumb('?m=trac&a=setUrl',$AppUI->_('Set Trac URL'));
-$titleBlock->addCrumb('?m=trac&a=addEnv',$AppUI->_('Manage Trac Environments'));
+if ($canEdit) $titleBlock->addCrumb('?m=trac&a=setUrl',$AppUI->_('Set Trac URL'));
+if ($canAdd || $canDelete) $titleBlock->addCrumb('?m=trac&a=addEnv',$AppUI->_('Manage Trac Environments'));
 $titleBlock->show();
 
 // all trac environments and display them as tabs (they are here, now, we could also add them into the db [later])

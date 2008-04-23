@@ -2,10 +2,10 @@
 /*
  * Name:      dpTrac
  * Directory: trac
- * Version:   0.2
+ * Version:   0.3-rc1
  * Class:     user
  * UI Name:   dpTrac
- * UI Icon:
+ * UI Icon:	trac_logo.png
  */
 
 // MODULE CONFIGURATION DEFINITION
@@ -25,7 +25,7 @@ if (@$a == 'setup') {
 
 class CSetupTrac {   
 
-	function install() {
+	public function install() {
 		$sql = ' (  `idconfig` SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT ,
 			 `dtkey` VARCHAR( 20 ) NOT NULL ,
 			 `dtvalue` VARCHAR( 50 ) NOT NULL ,
@@ -44,7 +44,7 @@ class CSetupTrac {
 		return db_error();
 	}
 	
-	function remove() {
+	public function remove() {
 		$q = new DBQuery;
 		$q->dropTable('trac_config');
 		$q->exec();
@@ -52,22 +52,15 @@ class CSetupTrac {
 		return db_error();
 	}
 	
-	function upgrade($old_version) {
-	/*
-		$q = new DBQuery;
+	public function upgrade($old_version) {
 		switch ($old_version) {
 			case '0.1':
-				$q->alterTable('trac_config');
-				$q->addField('history_table', 'varchar(15) NOT NULL default \'\'');
-				$q->dropField('history_module');
-				$q->exec();
-				$q->clear();
-				$q->addIndex('index_history_item', '(history_item)');
-				$q->exec();
-				$q->clear();
+				// we had no DB in v0.1
+				$this->install();
+			case '0.2':
+				// no upgrades
+			break;
 		}
-		return db_error();
-		*/
 	}
 }
 
