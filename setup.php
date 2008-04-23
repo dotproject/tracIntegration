@@ -11,7 +11,7 @@
 // MODULE CONFIGURATION DEFINITION
 $config = array();
 $config['mod_name'] = 'dpTrac';
-$config['mod_version'] = '0.2';
+$config['mod_version'] = '0.3-rc1';
 $config['mod_directory'] = 'trac';
 $config['mod_setup_class'] = 'CSetupTrac';
 $config['mod_type'] = 'user';
