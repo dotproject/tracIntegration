@@ -58,7 +58,8 @@ class CSetupTrac {
 				// we had no DB in v0.1
 				$this->install();
 			case '0.2':
-				// no upgrades
+				// no upgrades, everything worked fine ;)
+				return(true);
 			break;
 		}
 	}
