@@ -10,7 +10,7 @@ if ($env == ''| empty($env)) {
 	$env = $tracenvs[$tab]['dtvalue'];
 }
 // fetch the url from the DB later on
-$tracProj = new CTracProj();
+$tracProj = new CTracProject();
 $url = $tracProj->getURL();
 
 print('<iframe src="'.$url.$env.'" width="100%" height="700" frameborder="0" name="tracFrame" style="padding:2px;">Iframes-Error</iframe>');

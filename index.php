@@ -1,18 +1,17 @@
-<?php /* TRAC $Id: index.php,v 1.2 2008/04/23 13:09:44 david_iondev Exp $ */
+<?php /* TRAC $Id: index.php,v 1.3 2008/04/23 22:21:50 david_iondev Exp $ */
 /**
  * Trac integration for dotProject
  *
  * @author David Raison <david@ion.lu>
  * @package dpTrac
- * @version 0.3-rc1
+ * @version 0.3-rc2
+ * @since 0.1
  * @copyright ION Development (www.iongroup.lu)
  * @license http://www.gnu.org/copyleft/gpl.html GPL License 2 or later
  * @todo 
- *	Add projects, tasks module integration
- * 		i.e. allow to link to specific trac environments/tickets from within projects/tasks
- * 	Add environment generation by project adding (tick case -> add as trac environment)
- *		--> (difficult, projects.addedit doesn't have any tabs)
- * 	Preserve states (urls) between tab switches
+ *	Add tasks module integration
+ * 		i.e. allow to link to specific trac tickets from within tasks	( in 0.3-rc3)
+ * 	Preserve states (urls) between tab switches	(in 0.4)
  */
 
 if (!defined('DP_BASE_DIR')){
@@ -37,19 +36,18 @@ if (!$canRead) {
 
 $AppUI->savePlace();
 $titleBlock = new CTitleBlock( 'Trac', 'trac_logo.png', $m, "$m.$a" );
-if ($canEdit) $titleBlock->addCrumb('?m=trac&a=setUrl',$AppUI->_('Set Trac URL'));
+//if ($canEdit) $titleBlock->addCrumb('?m=trac&a=setUrl',$AppUI->_('Set Trac URL'));
 if ($canAdd || $canDelete) $titleBlock->addCrumb('?m=trac&a=addEnv',$AppUI->_('Manage Trac Environments'));
 $titleBlock->show();
 
 // all trac environments and display them as tabs (they are here, now, we could also add them into the db [later])
 // in the same go, we could add the url into the DB, so as to make this module publicly available.
-$tracProj = new CTracProj();
+$tracProj = new CTracProject();
 $tracenvs = $tracProj->fetchEnvironments();
 $AppUI->setState('tracenvs',$tracenvs);
 
 // what trac environment to load
 if(($env = dPgetParam($_REQUEST,'env','')) != ''){	// set
-	//$env = dPgetParam($_REQUEST,'env','');	// third arg = default
 	$AppUI->setState('environment',$env);
 	$tabs = array_keys($tracenvs,$env);
 	$tab = $tabs[0];
@@ -58,8 +56,10 @@ if(($env = dPgetParam($_REQUEST,'env','')) != ''){	// set
 	$tab = ($tab != '') ? $tab : 0;
 }
 
-if ($tracProj->getURL() == '')
-	$AppUI->setMsg("You need to set an URL.",UI_MSG_WARNING);
+// check if a project exists?
+$hosts = $tracProj->fetchHost();
+if (empty($hosts))
+	$AppUI->setMsg("You need to configure a trac host for one of your projects in the projects module first.",UI_MSG_WARNING);
 elseif (empty($tracenvs))
 	$AppUI->setMsg("You need to add at least one environment.",UI_MSG_WARNING);
 else {
