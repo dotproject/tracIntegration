@@ -1,18 +1,19 @@
 <?php
 
 // what trac environment to load
-$env = $AppUI->getState('environment');
+$envName = $AppUI->getState('environment');
 
+var_dump($_REQUEST);
 // overall environment array to resolve tab idx
-if ($env == ''| empty($env)) {
+if ($env == '' || empty($env)) {
 	$tracenvs = $AppUI->getState('tracenvs');
 	$tab = dPgetParam($_REQUEST,'tab',0);
-	$env = $tracenvs[$tab]['dtvalue'];
+	$envName = $tracenvs[$tab]['dtenvironment'];
+	$envId = $tracenvs[$tab]['idenvironment'];
 }
-// fetch the url from the DB later on
-$tracProj = new CTracProject();
-$url = $tracProj->getURL();
+$tracProj = new CTracIntegrator();
+$url = $tracProj->getHostFromEnvironment($envId);
 
-print('<iframe src="'.$url.$env.'" width="100%" height="700" frameborder="0" name="tracFrame" style="padding:2px;">Iframes-Error</iframe>');
+print('<iframe src="'.$url.$envName.'" width="100%" height="700" frameborder="0" name="tracFrame" style="padding:2px;">Iframes-Error</iframe>');
 
 ?>

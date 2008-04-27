@@ -13,42 +13,23 @@ if (!defined('DP_BASE_DIR')){
 	die('You should not access this file directly.');
 }
 
+// save tab id
+$AppUI->setState('tabid',dPgetParam($_REQUEST,'tab'));
+
 // load our class
 require_once $AppUI->getModuleClass('trac');
-$tracProj = new CTracProject();
-
+$tracProj = new CTracIntegrator();
 $project_id = intval( dPgetParam( $_REQUEST, 'project_id', 0 ) );
-$host = $tracProj->fetchHost($project_id);
-if (!empty($host)) { // check if a host has been defined for this module
-/* 
- * check if some environment already exists for this module
- *   a) offer a link
- *   b) see if we can extract some information (curl?!)
- */
 
-} elseif (empty($host) || dPgetParam($_REQUEST, 'trac_configure', 0)) {// if no host found or configuration request, offer a form:
-	?>
-	<p>If there is a trac environment available for this project, please select or enter the URL of its HOST and the name of the environment below:</p>
-	<form action="?m=trac&a=addEnv" method="post" name="setHostEnv">
-	<table style="width: auto;">
-	<tbody>
-	<tr><td>
-	<label for="existURL">Trac HOST</label></td>
-	<!-- a select box would be better here -->
-	<td><select name="existURL">
-	<option value="0">Pick a host</option>
-	<?php
-		// generate options
-	?>
-	</select></td></tr>
-	<tr><td><label for="newurl">OR enter a new one</label></td>
-	<td><input id="tracurl" name="newurl" type="text" size="40" value="<?php print($url); ?>"/>
-	</td></tr><tr><td>
-	<label for="newenv">Trac Environment</label></td>
-	<td><input id="tracenv" name="newenv" type="text" size="40" value="<?php print($env); ?>"/></td></tr>
-	<tr><td colspan="2" style="text-align:right;"><button name="submit" value="saveTracConf" title="Click to Save">Save</button></td></tr>
-	</tbody></table>
-	</form>
-	<?php
-}
+$myhost = $tracProj->fetchHosts($project_id);
+$environment = $tracProj->fetchEnvironments($project_id);
+
+// check if a host has been defined for this module
+if (!empty($myhost) && !empty($environment)) { 
+ 	// a) offer a link
+	print('here be button to configure in the right upper corner<br/>');
+	print($tracProj->showLink($project_id));
+ 	// b) see if we can extract some information (curl?!)
+} elseif (empty($myhost) || empty($environment) || dPgetParam($_REQUEST, 'trac_configure', 0)) // if no host found or configuration request, offer a form:
+	print($tracProj->displayConfigForm($project_id));
 ?>

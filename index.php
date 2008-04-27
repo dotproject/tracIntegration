@@ -1,4 +1,4 @@
-<?php /* TRAC $Id: index.php,v 1.3 2008/04/23 22:21:50 david_iondev Exp $ */
+<?php /* TRAC $Id: index.php,v 1.4 2008/04/24 23:53:33 david_iondev Exp $ */
 /**
  * Trac integration for dotProject
  *
@@ -36,28 +36,29 @@ if (!$canRead) {
 
 $AppUI->savePlace();
 $titleBlock = new CTitleBlock( 'Trac', 'trac_logo.png', $m, "$m.$a" );
-//if ($canEdit) $titleBlock->addCrumb('?m=trac&a=setUrl',$AppUI->_('Set Trac URL'));
 if ($canAdd || $canDelete) $titleBlock->addCrumb('?m=trac&a=addEnv',$AppUI->_('Manage Trac Environments'));
 $titleBlock->show();
 
 // all trac environments and display them as tabs (they are here, now, we could also add them into the db [later])
 // in the same go, we could add the url into the DB, so as to make this module publicly available.
-$tracProj = new CTracProject();
+$tracProj = new CTracIntegrator();
 $tracenvs = $tracProj->fetchEnvironments();
 $AppUI->setState('tracenvs',$tracenvs);
 
 // what trac environment to load
 if(($env = dPgetParam($_REQUEST,'env','')) != ''){	// set
 	$AppUI->setState('environment',$env);
-	$tabs = array_keys($tracenvs,$env);
-	$tab = $tabs[0];
+	//$tabs = array_keys($tracenvs,$env);
+	// multi-dimensional array!!
+	// is array_search R?
+	//$tab = $tabs[0];
 } else {
 	$tab = dPgetParam($_REQUEST,'tab',0);
 	$tab = ($tab != '') ? $tab : 0;
 }
 
 // check if a project exists?
-$hosts = $tracProj->fetchHost();
+$hosts = $tracProj->fetchHosts();
 if (empty($hosts))
 	$AppUI->setMsg("You need to configure a trac host for one of your projects in the projects module first.",UI_MSG_WARNING);
 elseif (empty($tracenvs))
@@ -66,7 +67,7 @@ else {
 	// generate tabs
 	$tabBox = new CTabBox('?m=trac',dPgetConfig('root_dir').'/modules/trac/',$tab);
 	foreach($tracenvs as $env)
-		$tabBox->add('embed',$env['dtvalue']);
+		$tabBox->add('embed',$env['dtenvironment']);
 	$tabBox->show();
 }
 ?>
