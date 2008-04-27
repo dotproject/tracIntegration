@@ -1,4 +1,4 @@
-<?php /* TRAC $Id: index.php,v 1.4 2008/04/24 23:53:33 david_iondev Exp $ */
+<?php /* TRAC $Id: index.php,v 1.5 2008/04/27 21:48:14 david_iondev Exp $ */
 /**
  * Trac integration for dotProject
  *
@@ -18,12 +18,6 @@ if (!defined('DP_BASE_DIR')){
 	die('You should not access this file directly.');
 }
 
-/** Some notes for the dev, please don't mind this for the time being 
-var_dump($AppUI->user_id);	
-var_dump($perms->getPermittedUsers("trac"));	
-$canEdit = $perms->checkModuleItem( $m, 'edit', $moditem );
-*/
-
 // Checking permissions
 $perms =& $AppUI->acl();
 $canRead = $perms->checkModule( $m, 'view');
@@ -39,22 +33,16 @@ $titleBlock = new CTitleBlock( 'Trac', 'trac_logo.png', $m, "$m.$a" );
 if ($canAdd || $canDelete) $titleBlock->addCrumb('?m=trac&a=addEnv',$AppUI->_('Manage Trac Environments'));
 $titleBlock->show();
 
-// all trac environments and display them as tabs (they are here, now, we could also add them into the db [later])
-// in the same go, we could add the url into the DB, so as to make this module publicly available.
 $tracProj = new CTracIntegrator();
 $tracenvs = $tracProj->fetchEnvironments();
-$AppUI->setState('tracenvs',$tracenvs);
+$AppUI->setState('tracenvs',$tracenvs);	// reusing it in embed.php, this is saving us a query
 
 // what trac environment to load
-if(($env = dPgetParam($_REQUEST,'env','')) != ''){	// set
-	$AppUI->setState('environment',$env);
-	//$tabs = array_keys($tracenvs,$env);
-	// multi-dimensional array!!
-	// is array_search R?
-	//$tab = $tabs[0];
+if(($envId = dPgetParam($_REQUEST,'envId','')) != ''){
+	$tab = $envId;
 } else {
-	$tab = dPgetParam($_REQUEST,'tab',0);
-	$tab = ($tab != '') ? $tab : 0;
+	$tab = dPgetParam($_REQUEST,'tab',1);	// 1, not 0 because we're using the environment ids as keys
+	$tab = ($tab != '') ? $tab : 1;
 }
 
 // check if a project exists?
@@ -63,11 +51,10 @@ if (empty($hosts))
 	$AppUI->setMsg("You need to configure a trac host for one of your projects in the projects module first.",UI_MSG_WARNING);
 elseif (empty($tracenvs))
 	$AppUI->setMsg("You need to add at least one environment.",UI_MSG_WARNING);
-else {
-	// generate tabs
-	$tabBox = new CTabBox('?m=trac',dPgetConfig('root_dir').'/modules/trac/',$tab);
+else { 	// generate tabs
+	$tabBox = new CTabBox('?m=trac',dPgetConfig('root_dir').'/modules/trac/',$tab);	// $tab is selected by default
 	foreach($tracenvs as $env)
-		$tabBox->add('embed',$env['dtenvironment']);
+		$tabBox->add('embed',$env['dtenvironment'],false,$env['idenvironment']); // set environment id as tab key
 	$tabBox->show();
 }
 ?>

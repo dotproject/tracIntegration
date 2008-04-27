@@ -45,7 +45,7 @@ class CTracIntegrator{
 
 	public function showLink($project_id){
 		$env = $this->fetchEnvironments($project_id);
-		return('<a href="?m=trac&env='.$env['dtenvironment'].'">Go to <strong>'.$env['dtenvironment'].'</strong> trac environment.</a>');
+		return('<a href="?m=trac&envId='.$env['idenvironment'].'">Go to <strong>'.$env['dtenvironment'].'</strong> trac environment.</a>');
 	}
 
 	public function fetchEnvironments($project_id=0){
@@ -70,13 +70,6 @@ class CTracIntegrator{
 		return true;
 	}
 
-	public function deleteProjectEnvironments($project_id){
-		$envs = $this->fetchEnvironments($project_id);
-		foreach($envs as $env)
-			$this->deleteEnvironment($env['idenvironment']);
-		// return value? (see deleteEnvironment())
-	}
-
 	public function addEnvironment($name,$project_id){
 		$q = new DBQuery();
 		$q->addTable('trac_environment');
@@ -95,7 +88,7 @@ class CTracIntegrator{
 			$q->addWhere('fiproject = '.$project_id);
 		$q->prepare();
 		if($project_id)
-			return($q->loadResult());
+			return($q->loadHash());
 		else
 			return($q->loadList());
 		$q->clear();
@@ -156,10 +149,17 @@ class CTracIntegrator{
 	}
 
 	public function getHostFromEnvironment($env){
+		// @TODO 0.3 : write joins!
 		$project = $this->getProjectFromEnvironment($env);
 		$host = $this->fetchHosts($project);
-		return($host);
+		return($host['dthost']);
+	}
+
+	public function getEnvironmentsFromHost($host){
+		// @TODO 0.3 : write joins!
+		$project = $this->getProjectFromHost($host);
+		$environments = $this->fetchEnvironments($project);
+		return($environments);
 	}
 }
-
 ?>

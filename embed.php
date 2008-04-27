@@ -1,16 +1,11 @@
 <?php
 
-// what trac environment to load
-$envName = $AppUI->getState('environment');
+// $tab and $envId are used in the same way
+$envId = dPgetParam($_REQUEST,'envId',1);
+$envId = ($envId == '' || empty($envId)) ? dPgetParam($_REQUEST,'tab',1) : $envId;
+$tracenvs = $AppUI->getState('tracenvs');
+$envName = $tracenvs[$envId-1]['dtenvironment'];	// array starts from 0, envs start from 1
 
-var_dump($_REQUEST);
-// overall environment array to resolve tab idx
-if ($env == '' || empty($env)) {
-	$tracenvs = $AppUI->getState('tracenvs');
-	$tab = dPgetParam($_REQUEST,'tab',0);
-	$envName = $tracenvs[$tab]['dtenvironment'];
-	$envId = $tracenvs[$tab]['idenvironment'];
-}
 $tracProj = new CTracIntegrator();
 $url = $tracProj->getHostFromEnvironment($envId);
 
