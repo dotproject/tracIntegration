@@ -1,4 +1,4 @@
-<?php /* TRAC $Id: index.php,v 1.5 2008/04/27 21:48:14 david_iondev Exp $ */
+<?php /* TRAC $Id: index.php,v 1.6 2008/04/27 23:36:08 david_iondev Exp $ */
 /**
  * Trac integration for dotProject
  *
@@ -35,15 +35,14 @@ $titleBlock->show();
 
 $tracProj = new CTracIntegrator();
 $tracenvs = $tracProj->fetchEnvironments();
+$envids = array_keys($tracenvs);
 $AppUI->setState('tracenvs',$tracenvs);	// reusing it in embed.php, this is saving us a query
 
 // what trac environment to load
-if(($envId = dPgetParam($_REQUEST,'envId','')) != ''){
+if(($envId = dPgetParam($_REQUEST,'envId','')) != '')
 	$tab = $envId;
-} else {
-	$tab = dPgetParam($_REQUEST,'tab',1);	// 1, not 0 because we're using the environment ids as keys
-	$tab = ($tab != '') ? $tab : 1;
-}
+else
+	$tab = dPgetParam($_REQUEST,'tab',$tracenvs[$envids[0]]['idenvironment']);	// first env as default
 
 // check if a project exists?
 $hosts = $tracProj->fetchHosts();

@@ -27,7 +27,9 @@ $environment = $tracProj->fetchEnvironments($project_id);
 // check if a host has been defined for this module
 if (!empty($myhost) && !empty($environment)) { 
  	// a) offer a link
+	print('<p>');
 	print($tracProj->showLink($project_id));
+	print('</p>');
  	// b) see if we can extract some information (curl?!)
 	// c) add a button to reconfigure
 } elseif (empty($myhost) || empty($environment) || dPgetParam($_REQUEST, 'trac_configure', 0)) // if no host found or configuration request, offer a form:

@@ -72,14 +72,23 @@ if (($todel = dPgetParam($_REQUEST,'deleteHost')) != '' && $canDelete){
 ?>
 <h3>Existing Setups</h3>
 <form name="deleteEnv" action="?m=trac&a=addEnv" method="post">
-<table style="border: 1px solid navy; background: skyblue url(style/default/images/titlegrad.jpg) repeat scroll 0% 50%; width: 40%; color: white;">
-<thead><tr><th>Host</th><th>Environment</th><th>Action</th></tr></thead><tbody>
+<table style="border: 1px solid navy; background: skyblue url(style/default/images/titlegrad.jpg) repeat scroll 0% 50%; width: 50%; color: white;">
+<thead><tr><th>Host</th><th>Environment</th><th>[Project]</th><th>Action</th></tr></thead><tbody>
 <?php
+// fetch existing projects
+require_once $AppUI->getModuleClass('projects');
+$projObj = new CProject();
+$projectRows = $projObj->getAllowedProjectsInRows($AppUI->user_id);
+$projects = $projectRows->GetRows();    // FetchRow(), GetAssoc()       [AdoDB RecordSet object]
+$orderedProjects = array();
+foreach($projects as $project)
+	$orderedProjects[$project['project_id']] = $project['project_name'];
+
 $hosts = $tracpr->fetchHosts();
 foreach($hosts as $host){
 	print('<tr><td>'.$host['dthost'].'</td>');
 	if($canDelete){
-		print('<td/><td><button id="deleteHost_'.$host['idhost'].'" name="deleteHost"'
+		print('<td colspan="2"/><td><button id="deleteHost_'.$host['idhost'].'" name="deleteHost"'
 		.'value="'.$host['idhost'].'" style="background: transparent;'
 		.'border:0;" title="Click to delete this host">'
 		.dPshowImage( './images/icons/stock_delete-16.png', '16', '16',  '' )
@@ -89,7 +98,9 @@ foreach($hosts as $host){
 	if($envs != ''){
 		$envs = (is_array($envs[0])) ? $envs : array($envs);
 		foreach($envs as $env){
-			print('<tr><td/><td>'.$env['dtenvironment'].'</td>');
+			printf('<tr><td/><td>%s</td>',$env['dtenvironment']);
+			$projId = $tracpr->getProjectFromEnvironment($env['idenvironment']);
+			printf('<td>[%s]</td>',$orderedProjects[$projId]);
 			if($canDelete){
 				print('<td><button id="deleteEnv_'.$env['idenvironment'].'" name="deleteEnv"'
 				.'value="'.$env['idenvironment'].'" style="background: transparent;'
@@ -105,22 +116,20 @@ foreach($hosts as $host){
 </form>
 <?php
 /**
- * this way of editing is deprecated in favor of adding environments directly in the projects module, but I'll leave this option open for the time being
- * @todo 0.3:
- *	- try to set the host automatically when a project has been selected or to narrow down the possible choices of projects when a host has been selected
+ * this way of editing is deprecated in favor of adding environments directly in the projects module.
+ * It will be unavailable until there's a js library available for dotproject or I found another solution.
+ * @todo (see above):
+ *	- try to set the host automatically when a project has been selected 
+ * or to narrow down the possible choices of projects when a host has been selected
  *	- check if there is a project first!! 	
  */
+ /*
 
 if ($canAdd) {
-	// fetch existing projects
-	require_once $AppUI->getModuleClass('projects');
-	$projObj = new CProject();
-	$projectRows = $projObj->getAllowedProjectsInRows($AppUI->user_id);
-	$projects = $projectRows->GetRows();    // FetchRow(), GetAssoc()       [AdoDB RecordSet object]
 ?>
 	<h3>New Setup</h3>
 	<form action="?m=trac&a=addEnv" method="post" name="addNewEnv">
-	<table style="border: 1px solid navy; background: skyblue url(style/default/images/titlegrad.jpg) repeat scroll 0% 50%; width: 40%; color: white;">
+	<table style="border: 1px solid navy; background: skyblue url(style/default/images/titlegrad.jpg) repeat scroll 0% 50%; width: 50%; color: white;">
 	<thead><tr><th>Name</th></tr></thead><tbody>
 	<tr><td><label for="project">Project</label></td><td><select id="projects" name="project_id" onchange=""/>
 	<?php
@@ -138,4 +147,5 @@ if ($canAdd) {
 	</form>
 <?php
 }
+*/
 ?>

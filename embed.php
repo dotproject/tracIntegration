@@ -1,10 +1,12 @@
 <?php
 
 // $tab and $envId are used in the same way
-$envId = dPgetParam($_REQUEST,'envId',1);
-$envId = ($envId == '' || empty($envId)) ? dPgetParam($_REQUEST,'tab',1) : $envId;
 $tracenvs = $AppUI->getState('tracenvs');
-$envName = $tracenvs[$envId-1]['dtenvironment'];	// array starts from 0, envs start from 1
+$envids = array_keys($tracenvs);
+$defaultEnv = $tracenvs[$envids[0]]['idenvironment'];
+$envId = dPgetParam($_REQUEST,'envId',$defaultEnv);
+$envId = ($envId == '' || empty($envId)) ? dPgetParam($_REQUEST,'tab',$defaultEnv) : $envId;
+$envName = $tracenvs[$envId]['dtenvironment'];
 
 $tracProj = new CTracIntegrator();
 $url = $tracProj->getHostFromEnvironment($envId);

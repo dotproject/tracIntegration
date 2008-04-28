@@ -55,8 +55,7 @@ class CTracIntegrator{
 		if($project_id)
 			$q->addWhere("fiproject = '$project_id'");
 		$q->prepare();
-		$res = ($project_id) ? $q->loadHash() : $q->loadList();
-		$q->clear();
+		$res = ($project_id) ? $q->loadHash() : $q->loadHashList('idenvironment');
 		return($res);
 	}
 
@@ -65,7 +64,6 @@ class CTracIntegrator{
 		$q->setDelete('trac_environment');
 		$q->addWhere('idenvironment = '.$id);
 		$q->exec();
-		$q->clear();
 		// how can I check for success?
 		return true;
 	}
