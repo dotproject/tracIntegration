@@ -1,10 +1,12 @@
 <?php
 /**
+ * $Id$
  * Trac integration for dotProject
  *
  * @author David Raison <david@ion.lu>
  * @package dpTrac
- * @version 0.3-rc2
+ * @version 0.3
+ * @since 0.1
  * @copyright ION Development (www.iongroup.lu)
  * @license http://www.gnu.org/copyleft/gpl.html GPL License 2 or later
  */
@@ -27,6 +29,8 @@ $AppUI->savePlace();
 $titleBlock = new CTitleBlock( 'Trac', 'trac_logo.png', $m, "$m.$a" );
 $titleBlock->addCrumb('?m=trac&a=index',$AppUI->_('View Environments'));
 $titleBlock->show();
+
+require_once 'trac.class.php';
 $tracpr = new CTracIntegrator();
 
 // first check if a project_id is defined. Else we can't save anything at all

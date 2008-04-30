@@ -1,9 +1,10 @@
 <?php
 /**
+ * $Id$ 
  * This class contains all methods used by the dpTrac module
  *
  * @author David Raison <david@ion.lu>
- * @version 0.3-rc2
+ * @version 0.3
  * @since 0.1
  * @package dpTrac
  * @copyright ION Development (www.iongroup.lu)
@@ -16,39 +17,6 @@ class CTracIntegrator{
 	protected $environments;
 
 	public function __construct(){
-	}
-
-	public function displayConfigForm($project_id=0){
-		$hosts = $this->fetchHosts();
-		$out = '<p>If there is a trac environment available for this project, please select or enter the URL 
-				of its HOST and the name of the environment below:</p>
-			   <form action="?m=trac&a=addEnv" method="post" name="setHostEnv">
-				<input type="hidden" name="project_id" value="'.$project_id.'"/>
-			   <table style="width: auto;">
-			   <tbody>';
-   	if(!empty($hosts)){
-			$out .= '<tr><td><label for="existURL">Trac HOST</label></td>
-				   <td><select class="text" name="existURL">
-			   	<option value="0">Pick a host</option>';
-	      // generate options
-   	   foreach($hosts as $host){
-					$selected = ($host['fiproject'] == $project_id) ? 'selected' : 'false';
-	            $out .= sprintf('<option value="%d" selected="%s">%s</option>',$host['idhost'],$host['fiproject'],$host['dthost']);
-			}
-	      $out .= '</select></td></tr>';
-      }
-   	$out .= '<tr><td><label for="newurl">Enter a new host</label></td>
-				   <td><input class="text" id="tracurl" name="newurl" type="text" size="40" value="'.$url.'"/>
-				   </td></tr><tr><td><label for="newenv">Trac Environment</label></td>
-				   <td><input id="tracenv" class="text" name="newenv" type="text" size="40" value="'.$env.'"/></td></tr>
-   				<tr><td colspan="2" style="text-align:right;"><button class="button" name="submit" value="saveTracConf" title="Click to Save">Save</button></td></tr>
-				   </tbody></table></form>';
-		return($out);
-	}
-
-	public function showLink($project_id){
-		$env = $this->fetchEnvironments($project_id);
-		return('<a href="?m=trac&envId='.$env['idenvironment'].'">Go to <strong>'.$env['dtenvironment'].'</strong> trac environment.</a>');
 	}
 
 	public function fetchEnvironments($project_id=0){
@@ -187,13 +155,32 @@ class CTracTicket extends CTracIntegrator{
 		return($res);
 	}
 
-	public function saveTicket($num,$summary){
+	public function addTicket($num,$summary,$task){
+		$q = new DBQuery;
+		$q->addTable('trac_ticket');
+		$q->addInsert(array('fiticket','dtsummary','fitask'),array($num,$summary,$task),true);
+		$q->exec();
+		$q->clear();
+		return true;
 	}
 
 	public function updateTicket($id,$summary){
+		$q = new DBQuery();
+		$q->addTable('trac_ticket');
+		$q->addUpdate('dtsummary',$summary);
+		$q->addWhere('idticket = '.$id);
+		$q->exec();
+		$q->clear();
+		return true;
 	}
 
 	public function deleteTicket($id){
+		$q = new DBQuery();
+		$q->setDelete('trac_ticket');
+		$q->addWhere('idticket = '.$id);
+		$q->exec();
+		$q->clear();
+		return true;
 	}
 
 }
