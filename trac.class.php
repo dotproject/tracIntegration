@@ -12,6 +12,9 @@
 
 class CTracIntegrator{
 
+	protected $host;
+	protected $environments;
+
 	public function __construct(){
 	}
 
@@ -25,7 +28,7 @@ class CTracIntegrator{
 			   <tbody>';
    	if(!empty($hosts)){
 			$out .= '<tr><td><label for="existURL">Trac HOST</label></td>
-				   <td><select name="existURL">
+				   <td><select class="text" name="existURL">
 			   	<option value="0">Pick a host</option>';
 	      // generate options
    	   foreach($hosts as $host){
@@ -35,10 +38,10 @@ class CTracIntegrator{
 	      $out .= '</select></td></tr>';
       }
    	$out .= '<tr><td><label for="newurl">Enter a new host</label></td>
-				   <td><input id="tracurl" name="newurl" type="text" size="40" value="'.$url.'"/>
+				   <td><input class="text" id="tracurl" name="newurl" type="text" size="40" value="'.$url.'"/>
 				   </td></tr><tr><td><label for="newenv">Trac Environment</label></td>
-				   <td><input id="tracenv" name="newenv" type="text" size="40" value="'.$env.'"/></td></tr>
-   				<tr><td colspan="2" style="text-align:right;"><button name="submit" value="saveTracConf" title="Click to Save">Save</button></td></tr>
+				   <td><input id="tracenv" class="text" name="newenv" type="text" size="40" value="'.$env.'"/></td></tr>
+   				<tr><td colspan="2" style="text-align:right;"><button class="button" name="submit" value="saveTracConf" title="Click to Save">Save</button></td></tr>
 				   </tbody></table></form>';
 		return($out);
 	}
@@ -57,6 +60,11 @@ class CTracIntegrator{
 		$q->prepare();
 		$res = ($project_id) ? $q->loadHash() : $q->loadHashList('idenvironment');
 		return($res);
+	}
+
+	public function hasTrac($project_id){
+		$env = $this->fetchEnvironments($project_id);
+		return($env);
 	}
 
 	public function deleteEnvironment($id){
@@ -159,5 +167,34 @@ class CTracIntegrator{
 		$environments = $this->fetchEnvironments($project);
 		return($environments);
 	}
+}
+
+class CTracTicket extends CTracIntegrator{
+
+	protected $ticket;
+
+	public function __contruct(){
+	}
+
+	public function fetchTickets($task_id){
+		$q = new DBQuery();
+		$q->addTable('trac_ticket');
+		$q->addQuery('idticket,fiticket,dtsummary');
+		$q->addWhere('fitask = '.$task_id);
+		$q->prepare();
+		$res = $q->loadList();
+		$q->clear();
+		return($res);
+	}
+
+	public function saveTicket($num,$summary){
+	}
+
+	public function updateTicket($id,$summary){
+	}
+
+	public function deleteTicket($id){
+	}
+
 }
 ?>

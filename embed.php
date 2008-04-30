@@ -8,6 +8,9 @@ $envId = dPgetParam($_REQUEST,'envId',$defaultEnv);
 $envId = ($envId == '' || empty($envId)) ? dPgetParam($_REQUEST,'tab',$defaultEnv) : $envId;
 $envName = $tracenvs[$envId]['dtenvironment'];
 
+
+// @TODO 0.3 if a ticket number has been given, figure it out and change the url accordingly
+
 $tracProj = new CTracIntegrator();
 $url = $tracProj->getHostFromEnvironment($envId);
 

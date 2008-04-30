@@ -1,17 +1,20 @@
-<?php /* TRAC $Id: index.php,v 1.7 2008/04/28 17:13:11 david_iondev Exp $ */
+<?php /* TRAC $Id: index.php,v 1.8 2008/04/30 03:35:17 david_iondev Exp $ */
 /**
  * Trac integration for dotProject
  *
  * @author David Raison <david@ion.lu>
  * @package dpTrac
- * @version 0.3-rc2
+ * @version 0.3
  * @since 0.1
  * @copyright ION Development (www.iongroup.lu)
  * @license http://www.gnu.org/copyleft/gpl.html GPL License 2 or later
  * @todo 
- *    v0.3: Add tasks module integration - allow to link to specific trac tickets from within tasks.
+ *    v0.3: 
+ *				a) Allow to reconfigure Environments in the Projects tab
+ *				b) Add tasks module integration - allow to link to specific trac tickets from within tasks.
  *    v0.4: Preserve states (urls) between tab switches.
  *    v0.5: Add support for trac xmlrpc calls (http://trac-hacks.org/wiki/XmlRpcPlugin).
+ *		undef: Use CPdObject as Parent Class
  *
  */
 
