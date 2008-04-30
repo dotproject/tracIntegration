@@ -1,4 +1,4 @@
-<?php /* TRAC $Id: index.php,v 1.6 2008/04/27 23:36:08 david_iondev Exp $ */
+<?php /* TRAC $Id: index.php,v 1.7 2008/04/28 17:13:11 david_iondev Exp $ */
 /**
  * Trac integration for dotProject
  *
@@ -9,9 +9,10 @@
  * @copyright ION Development (www.iongroup.lu)
  * @license http://www.gnu.org/copyleft/gpl.html GPL License 2 or later
  * @todo 
- *	Add tasks module integration
- * 		i.e. allow to link to specific trac tickets from within tasks	( in 0.3-rc3)
- * 	Preserve states (urls) between tab switches	(in 0.4)
+ *    v0.3: Add tasks module integration - allow to link to specific trac tickets from within tasks.
+ *    v0.4: Preserve states (urls) between tab switches.
+ *    v0.5: Add support for trac xmlrpc calls (http://trac-hacks.org/wiki/XmlRpcPlugin).
+ *
  */
 
 if (!defined('DP_BASE_DIR')){
