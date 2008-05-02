@@ -25,8 +25,7 @@ $AppUI->setState('tabid',$tab);
 $project_id = intval( dPgetParam( $_REQUEST, 'project_id', 0 ) );
 $myhost = $tracProj->fetchHosts($project_id);
 $environment = $tracProj->fetchEnvironments($project_id);
-
-$reconfigure = dPgetParam($_REQUEST, 'trac_configure');
+$reconfigure = dPgetParam($_REQUEST, 'trac_configure', NULL);
 
 // check if a host has been defined for this module
 if (!empty($myhost) && !empty($environment) && $reconfigure == NULL) { 

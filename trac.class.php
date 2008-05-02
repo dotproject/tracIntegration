@@ -1,6 +1,6 @@
 <?php
 /**
- * $Id: trac.class.php,v 1.7 2008/04/30 12:50:43 david_iondev Exp $ 
+ * $Id: trac.class.php,v 1.8 2008/05/02 11:59:11 david_iondev Exp $ 
  * This class contains all methods used by the dpTrac module
  *
  * @author David Raison <david@ion.lu>
@@ -11,8 +11,8 @@
  * @license http://www.gnu.org/copyleft/gpl.html GPL License 2 or later
  */
 
-class CTracIntegrator{
-
+class CTracIntegrator {
+ //extends CDpObject {
 	protected $host;
 	protected $environments;
 
@@ -39,8 +39,9 @@ class CTracIntegrator{
 		$q = new DBQuery();
 		$q->setDelete('trac_environment');
 		$q->addWhere('idenvironment = '.$id);
-		$q->exec();
-		// how can I check for success?
+		if (!($q->exec())) {
+			return db_error();
+		}
 		return true;
 	}
 
@@ -48,9 +49,10 @@ class CTracIntegrator{
 		$q = new DBQuery();
 		$q->addTable('trac_environment');
 		$q->addInsert(array('fiproject','dtenvironment'),array($project_id,$name),true);
-		$q->exec();
+		if (!($q->exec())) {
+			return db_error();
+		}
 		$q->clear();
-		// how can I check for success?
 		return true;
 	}
 	
@@ -59,7 +61,9 @@ class CTracIntegrator{
 		$q->addTable('trac_environment');
 		$q->addUpdate('dtenvironment',$env);
 		$q->addWhere('fiproject = '.$project_id);
-		$q->exec();
+		if (!($q->exec())) {
+			return db_error();
+		}
 		$q->clear();
 		return true;
 	}
@@ -83,9 +87,10 @@ class CTracIntegrator{
 		$q->addTable('trac_host');
 		$q->addUpdate('dthost',$url);
 		$q->addWhere('idhost = '.$id);
-		$q->exec();
+		if (!($q->exec())) {
+			return db_error();
+		}
 		$q->clear();
-		// how can I check for success?
 		return true;
 	}
 
@@ -93,9 +98,10 @@ class CTracIntegrator{
 		$q = new DBQuery();
 		$q->addTable('trac_host');
 		$q->addInsert(array('fiproject','dthost'),array($project_id,$url),true);
-		$q->exec();
+		if (!($q->exec())) {
+			return db_error();
+		}
 		$q->clear();
-		// how can I check for success?
 		return true;
 	}
 
@@ -103,9 +109,10 @@ class CTracIntegrator{
 		$q = new DBQuery();
 		$q->setDelete('trac_host');
 		$q->addWhere('idhost = '.$id);
-		$q->exec();
+		if (!($q->exec())) {
+			return db_error();
+		}
 		$q->clear();
-		// how can I check for success?
 		return true;
 	}
 
@@ -129,21 +136,30 @@ class CTracIntegrator{
 		$res = $q->loadResult();
 		$q->clear();
 		return($res);
-		
 	}
 
 	public function getHostFromEnvironment($env){
-		// @TODO 0.3 : write joins!
-		$project = $this->getProjectFromEnvironment($env);
-		$host = $this->fetchHosts($project);
-		return($host['dthost']);
+		$q = new DBQuery();
+		$q->addTable('trac_environment','e');
+		$q->addJoin('trac_host', 'h', 'h.fiproject = e.fiproject');
+		$q->addQuery('h.dthost');
+		$q->addWhere('e.idenvironment = '.$env);
+		$q->prepare();
+		$res = $q->loadResult();
+		$q->clear();
+		return($res);
 	}
 
 	public function getEnvironmentsFromHost($host){
-		// @TODO 0.3 : write joins!
-		$project = $this->getProjectFromHost($host);
-		$environments = $this->fetchEnvironments($project);
-		return($environments);
+		$q = new DBQuery();
+		$q->addTable('trac_environment','e');
+		$q->addJoin('trac_host', 'h', 'h.fiproject = e.fiproject');
+		$q->addQuery('e.idenvironment,e.dtenvironment');
+		$q->addWhere('h.idhost = '.$host);
+		$q->prepare();
+		$res = $q->loadList();
+		$q->clear();
+		return($res);
 	}
 }
 
@@ -169,7 +185,9 @@ class CTracTicket extends CTracIntegrator{
 		$q = new DBQuery;
 		$q->addTable('trac_ticket');
 		$q->addInsert(array('fiticket','dtsummary','fitask'),array($num,$summary,$task),true);
-		$q->exec();
+		if (!($q->exec())) {
+			return db_error();
+		}
 		$q->clear();
 		return true;
 	}
@@ -179,7 +197,9 @@ class CTracTicket extends CTracIntegrator{
 		$q->addTable('trac_ticket');
 		$q->addUpdate('dtsummary',$summary);
 		$q->addWhere('idticket = '.$id);
-		$q->exec();
+		if (!($q->exec())) {	// dunno if this is ideal, but this is how it's done elsewhere (tasks.class.php)
+			return db_error();
+		}
 		$q->clear();
 		return true;
 	}
@@ -188,7 +208,9 @@ class CTracTicket extends CTracIntegrator{
 		$q = new DBQuery();
 		$q->setDelete('trac_ticket');
 		$q->addWhere('idticket = '.$id);
-		$q->exec();
+		if (!($q->exec())) {
+			return db_error();
+		}
 		$q->clear();
 		return true;
 	}

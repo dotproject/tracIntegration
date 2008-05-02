@@ -1,6 +1,6 @@
 <?php
 /**
- * $Id: addEnv.php,v 1.7 2008/04/30 12:50:43 david_iondev Exp $
+ * $Id: addEnv.php,v 1.8 2008/05/02 11:59:11 david_iondev Exp $
  * Trac integration for dotProject
  * 
  * This file has 2 roles:
@@ -41,19 +41,20 @@ $tracpr = new CTracIntegrator();
 // first check if a project_id is defined. Else we can't save anything at all
 if(($project_id = dPgetParam($_REQUEST,'project_id')) != '' && $canAdd){
 	// Save environments
-	$oldenv = $AppUI->getState('oldenv');
+	if ($oldenv = $AppUI->getState('oldenv')) $AppUI->setState('oldenv',false);	// resetting
 	$newenv = dPgetParam($_REQUEST,'newenv',0);
 	if ($oldenv && $newenv && $newenv != $oldenv){	// that's an update
 		if ($tracpr->updateEnvironment($newenv,$project_id))
 			$AppUI->setMsg('Environment updated',UI_MSG_OK);
-	} elseif($newenv) {
+	} elseif($newenv && !$oldenv) {	// new environment
 		if ($tracpr->addEnvironment($newenv,$project_id))
-			$AppUI->setMsg('Environment updated',UI_MSG_OK);
+			$AppUI->setMsg('Environment added',UI_MSG_OK);
 	}
 		
 	// Save new host (first check if there has been a change at all)
 	$existHost = dPgetParam($_REQUEST,'existURL',0);
-	if ($existHost && $existHost != 'Pick a host' && $existHost != $AppUI->getState('oldhost')){
+	if ($oldhost = $AppUI->getState('oldhost')) $AppUI->setState('oldhost',false);	// resetting
+	if ($existHost && $existHost != 'Pick a host' && ($existHost != $oldhost || !$tracpr->fetchHosts($project_id))){
 		// then the user has selected a new host from the select box
 		$addhost = $existHost;
 	} elseif (($newurl = dPgetParam($_REQUEST,'newurl')) != ''){
@@ -122,7 +123,7 @@ foreach($hosts as $host){
 		.'</button></td></tr>');
 	}
 	$envs = $tracpr->getEnvironmentsFromHost($host['idhost']);	// can be more than one
-	if($envs != ''){
+	if(!empty($envs)){
 		$envs = (is_array($envs[0])) ? $envs : array($envs);
 		foreach($envs as $env){
 			printf('<tr><td/><td>%s</td>',$env['dtenvironment']);
