@@ -2,7 +2,7 @@
 /*
  * Name:      dpTrac
  * Directory: trac
- * Version:   0.3
+ * Version:   0.4
  * Class:     user
  * UI Name:   dpTrac
  * UI Icon:	trac_logo.png
@@ -11,7 +11,7 @@
 // MODULE CONFIGURATION DEFINITION
 $config = array();
 $config['mod_name'] = 'dpTrac';
-$config['mod_version'] = '0.3';
+$config['mod_version'] = '0.4';
 $config['mod_directory'] = 'trac';
 $config['mod_setup_class'] = 'CSetupTrac';
 $config['mod_type'] = 'user';
@@ -79,6 +79,9 @@ class CSetupTrac {
 		$q->exec();
 		$q->clear();
 		$q->dropTable('trac_environment');
+		$q->exec();
+		$q->clear();
+		$q->dropTable('trac_ticket');
 		$q->exec();
 		$q->clear();
 		return db_error();
