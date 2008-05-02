@@ -1,6 +1,6 @@
 <?php
 /**
- * $Id$
+ * $Id: tasks_tab.addedit.trac_ticket.php,v 1.2 2008/04/30 12:50:43 david_iondev Exp $
  * @since 0.3
  * @version 0.3
  * @package dpTrac
@@ -78,7 +78,7 @@ if(!$canAdd){
 					.'</tr>',$url,$ticket['fiticket'],$ticket['dtsummary'],$ticket['idticket']);
 		}
 	}
-// 2. add an empty row to attach a new ticket (num [textbox 5], summary [textbox 50], attach) 
+// 2. add an empty row to attach a new ticket (num [textbox 5], summary [textbox 50], attach [button]) 
 ?>
 <tr>
 <td>#<input type="text" class="text" name="ticketnum" maxlength="5" style="width:5em;"/></td>

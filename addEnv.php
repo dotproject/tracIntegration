@@ -1,11 +1,15 @@
 <?php
 /**
- * $Id$
+ * $Id: addEnv.php,v 1.7 2008/04/30 12:50:43 david_iondev Exp $
  * Trac integration for dotProject
+ * 
+ * This file has 2 roles:
+ * 	1) Manage existing hosts-environment setups
+ *  2) Act as a backend to the various forms that add or edit host and environment settings
  *
  * @author David Raison <david@ion.lu>
- * @package dpTrac
- * @version 0.3
+ * @package TracIntegration
+ * @version 0.4
  * @since 0.1
  * @copyright ION Development (www.iongroup.lu)
  * @license http://www.gnu.org/copyleft/gpl.html GPL License 2 or later
@@ -33,31 +37,47 @@ $titleBlock->show();
 require_once 'trac.class.php';
 $tracpr = new CTracIntegrator();
 
+/*** The Backend Part - request data handling ***/
 // first check if a project_id is defined. Else we can't save anything at all
-if(($project_id = dPgetParam($_REQUEST,'project_id')) != ''){
+if(($project_id = dPgetParam($_REQUEST,'project_id')) != '' && $canAdd){
 	// Save environments
-	if (($newenv = dPgetParam($_REQUEST,'newenv')) != '' && $canAdd){
-		if($tracpr->addEnvironment($newenv,$project_id))
-			$AppUI->setMsg('Environment added',UI_MSG_OK);
-		else
-			$AppUI->setMsg('Failed adding',UI_MSG_ERROR);
+	$oldenv = $AppUI->getState('oldenv');
+	$newenv = dPgetParam($_REQUEST,'newenv',0);
+	if ($oldenv && $newenv && $newenv != $oldenv){	// that's an update
+		if ($tracpr->updateEnvironment($newenv,$project_id))
+			$AppUI->setMsg('Environment updated',UI_MSG_OK);
+	} elseif($newenv) {
+		if ($tracpr->addEnvironment($newenv,$project_id))
+			$AppUI->setMsg('Environment updated',UI_MSG_OK);
 	}
-	// Save new host
-	if (($newurl = dPgetParam($_REQUEST,'newurl')) != '' && $canAdd){
-		if($tracpr->addHost($newurl,$project_id))
+		
+	// Save new host (first check if there has been a change at all)
+	$existHost = dPgetParam($_REQUEST,'existURL',0);
+	if ($existHost && $existHost != 'Pick a host' && $existHost != $AppUI->getState('oldhost')){
+		// then the user has selected a new host from the select box
+		$addhost = $existHost;
+	} elseif (($newurl = dPgetParam($_REQUEST,'newurl')) != ''){
+		// if the $existHost is still the $oldhost or there hasn't been any $existHost, save a new host
+		$addhost = $newurl;
+	} else
+		$addhost = false;
+		
+	// Now actually save that host (if any)
+	if($addhost){
+		if($tracpr->addHost($addhost,$project_id))
 			$AppUI->setMsg('Host added',UI_MSG_OK);
 		else
 			$AppUI->setMsg('Host not added',UI_MSG_ERROR);
 	}
 
-	// redirect to projects module if that's we we came from
+	// redirect to projects module if that's where we came from
 	if (dPgetParam($_REQUEST,'submit') == 'saveTracConf'){
 		$tab = $AppUI->getState('tabid');
 		$AppUI->redirect('m=projects&a=view&project_id='.$project_id.'&tab='.$tab);	
 		return;
 	}
-} // but we can delete stuff without knowing about the project_ids
-
+} 
+// We can delete stuff without knowing about the project_id though
 // Delete environments	
 if (($todel = dPgetParam($_REQUEST,'deleteEnv')) != '' && $canDelete){
 	if($tracpr->deleteEnvironment($todel))
@@ -73,6 +93,9 @@ if (($todel = dPgetParam($_REQUEST,'deleteHost')) != '' && $canDelete){
 		$AppUI->setMsg('Failed deleting',UI_MSG_ERROR);
 }
 
+
+
+/*** The Frontend Part - display existing setups ***/
 ?>
 <h3>Existing Setups</h3>
 <form name="deleteEnv" action="?m=trac&a=addEnv" method="post">

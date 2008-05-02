@@ -1,12 +1,12 @@
 <?php
 /**
- * $Id$ 
+ * $Id: trac.class.php,v 1.7 2008/04/30 12:50:43 david_iondev Exp $ 
  * This class contains all methods used by the dpTrac module
  *
  * @author David Raison <david@ion.lu>
- * @version 0.3
+ * @version 0.4
  * @since 0.1
- * @package dpTrac
+ * @package TracIntegration
  * @copyright ION Development (www.iongroup.lu)
  * @license http://www.gnu.org/copyleft/gpl.html GPL License 2 or later
  */
@@ -51,6 +51,16 @@ class CTracIntegrator{
 		$q->exec();
 		$q->clear();
 		// how can I check for success?
+		return true;
+	}
+	
+	public function updateEnvironment($env,$project_id){
+		$q = new DBQuery();
+		$q->addTable('trac_environment');
+		$q->addUpdate('dtenvironment',$env);
+		$q->addWhere('fiproject = '.$project_id);
+		$q->exec();
+		$q->clear();
 		return true;
 	}
 

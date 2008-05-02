@@ -1,12 +1,12 @@
 <?php
 /**
- * $Id$
+ * $Id: projects_tab.view.trac_environment.php,v 1.6 2008/04/30 12:50:43 david_iondev Exp $
  * This tab extends the projects module with options to work with the tracIntegration module
  * It checks whether there is a trac environment for the currently selected project
  * @author David Raison <david@ion.lu>
- * @version 0.3
+ * @version 0.4
  * @since 0.3-rc2
- * @package dpTrac
+ * @package TracIntegration
  * @copyright ION Development (www.iongroup.lu)
  * @license http://www.gnu.org/copyleft/gpl.html GPL License 2 or later
  * @todo 0.5: add xmlrpc support
@@ -44,21 +44,25 @@ if (!empty($myhost) && !empty($environment) && $reconfigure == NULL) {
 			<input type="hidden" name="project_id" value="'.$project_id.'"/>
 		   <table style="width: auto;">
 		   <tbody>';
-   	if(!empty($hosts)){
+   	if(!empty($hosts)){		// if we have some hosts already, display them to select from
 		$out .= '<tr><td><label for="existURL">Trac HOST</label></td>
 			<td><select class="text" name="existURL">
 			<option value="0">Pick a host</option>';
-	     	// generate options
+	     	// generate options for the select box
    		foreach($hosts as $host){
 			$selected = ($host['fiproject'] == $project_id) ? 'selected' : 'false';
-	        $out .= sprintf('<option value="%d" selected="%s">%s</option>',$host['idhost'],$host['fiproject'],$host['dthost']);
+			$AppUI->setState('oldhost',$host['dthost']);	// we will need this later when checking for changes to the setup
+	        $out .= sprintf('<option value="%1$s" selected="%2$s">%1$s</option>',$host['dthost'],$selected);
 		}
-	    $out .= '</select></td></tr>';
-    }
+	    $out .= '</select>&nbsp;or:&nbsp;</td></tr>';
+    }	// !empty($hosts)
+    // add a text field to add new hosts
+    $env = $tracProj->fetchEnvironments($project_id);
+    $AppUI->setState('oldenv',$env['dtenvironment']);
    	$out .= '<tr><td><label for="newurl">Enter a new host</label></td>
-			<td><input class="text" id="tracurl" name="newurl" type="text" size="40" value="'.$url.'"/>
+			<td><input class="text" id="tracurl" name="newurl" type="text" size="40"/>
 			</td></tr><tr><td><label for="newenv">Trac Environment</label></td>
-			<td><input id="tracenv" class="text" name="newenv" type="text" size="40" value="'.$env.'"/></td></tr>
+			<td><input id="tracenv" class="text" name="newenv" type="text" size="40" value="'.$env['dtenvironment'].'"/></td></tr>
 			<tr><td colspan="2" style="text-align:right;"><button class="button" name="submit" value="saveTracConf" title="Click to Save">Save</button></td></tr>
 			</tbody></table></form>';
 	print($out);
