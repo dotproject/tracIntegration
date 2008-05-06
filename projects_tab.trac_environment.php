@@ -1,15 +1,14 @@
 <?php
 /**
- * $Id: projects_tab.view.trac_environment.php,v 1.6 2008/04/30 12:50:43 david_iondev Exp $
+ * $Id: projects_tab.trac_environment.php,v 1.4 2008/05/02 14:10:37 david_iondev Exp $
  * This tab extends the projects module with options to work with the tracIntegration module
  * It checks whether there is a trac environment for the currently selected project
  * @author David Raison <david@ion.lu>
- * @version 0.4
+ * @version 0.5
  * @since 0.3-rc2
  * @package TracIntegration
  * @copyright ION Development (www.iongroup.lu)
  * @license http://www.gnu.org/copyleft/gpl.html GPL License 2 or later
- * @todo 0.5: add xmlrpc support
  */
 if (!defined('DP_BASE_DIR')){
 	die('You should not access this file directly.');
@@ -48,10 +47,10 @@ if (!empty($myhost) && !empty($environment) && $reconfigure == NULL) {
 			<td><select class="text" name="existURL">
 			<option value="0">Pick a host</option>';
 	     	// generate options for the select box
+	    if (!empty($myhost)) $AppUI->setState('oldhost',$myhost['dthost']);	// we will need this later when checking for changes to the setup
    		foreach($hosts as $host){
 			$selected = ($host['fiproject'] == $project_id) ? 'selected' : 'false';
-			$AppUI->setState('oldhost',$host['dthost']);	// we will need this later when checking for changes to the setup
-	        $out .= sprintf('<option value="%1$s" selected="%2$s">%1$s</option>',$host['dthost'],$selected);
+			$out .= sprintf('<option value="%1$s" selected="%2$s">%1$s</option>',$host['dthost'],$selected);
 		}
 	    $out .= '</select>&nbsp;or:&nbsp;</td></tr>';
     }	// !empty($hosts)

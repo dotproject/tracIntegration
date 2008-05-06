@@ -1,6 +1,6 @@
 <?php
 /**
- * $Id: addEnv.php,v 1.8 2008/05/02 11:59:11 david_iondev Exp $
+ * $Id: addEnv.php,v 1.9 2008/05/02 14:10:37 david_iondev Exp $
  * Trac integration for dotProject
  * 
  * This file has 2 roles:
@@ -9,7 +9,7 @@
  *
  * @author David Raison <david@ion.lu>
  * @package TracIntegration
- * @version 0.4
+ * @version 0.5
  * @since 0.1
  * @copyright ION Development (www.iongroup.lu)
  * @license http://www.gnu.org/copyleft/gpl.html GPL License 2 or later
@@ -54,22 +54,28 @@ if(($project_id = dPgetParam($_REQUEST,'project_id')) != '' && $canAdd){
 	// Save new host (first check if there has been a change at all)
 	$existHost = dPgetParam($_REQUEST,'existURL',0);
 	if ($oldhost = $AppUI->getState('oldhost')) $AppUI->setState('oldhost',false);	// resetting
-	if ($existHost && $existHost != 'Pick a host' && ($existHost != $oldhost || !$tracpr->fetchHosts($project_id))){
-		// then the user has selected a new host from the select box
-		$addhost = $existHost;
-	} elseif (($newurl = dPgetParam($_REQUEST,'newurl')) != ''){
-		// if the $existHost is still the $oldhost or there hasn't been any $existHost, save a new host
-		$addhost = $newurl;
-	} else
-		$addhost = false;
-		
-	// Now actually save that host (if any)
-	if($addhost){
-		if($tracpr->addHost($addhost,$project_id))
+	//var_dump($oldhost,$existHost,($oldhost == $existHost),$tracpr->fetchHosts($project_id)); exit;
+	if (($newurl = dPgetParam($_REQUEST,'newurl')) != ''){
+		// if a new hosts has been set, then add that.
+		try {
+			$host_id = $tracpr->addHost($newurl);
+			$tracpr->addHostLink($host_id,$project_id);
+			$AppUI->setMsg('Host added',UI_MSG_OK);
+		} catch (Exception $e) {
+			$AppUI->setMsg('Host not added, exception: '.$e->getMessage(),UI_MSG_ERROR);
+		}
+	} elseif ($existHost && $existHost != 'Pick a host' && ($existHost != $oldhost || !$tracpr->fetchHosts($project_id))){
+		/* then the user has selected a new host from the select box.
+		 * @attention NEW can also mean that this project didn't have any host set so far.
+		 * @attention ($existHost != $oldhost) can also evaluate to TRUE if oldhost is not set.
+		 * We only need to add a link in this case.
+		 */
+		if($tracpr->addHostLink($existHost,$project_id))
 			$AppUI->setMsg('Host added',UI_MSG_OK);
 		else
 			$AppUI->setMsg('Host not added',UI_MSG_ERROR);
-	}
+	} else
+		$addhost = false;
 
 	// redirect to projects module if that's where we came from
 	if (dPgetParam($_REQUEST,'submit') == 'saveTracConf'){

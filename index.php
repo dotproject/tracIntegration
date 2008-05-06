@@ -1,11 +1,11 @@
 <?php
 /**
- * $Id: index.php,v 1.11 2008/05/02 11:59:11 david_iondev Exp $
+ * $Id: index.php,v 1.12 2008/05/02 14:10:37 david_iondev Exp $
  * Trac integration for dotProject
  *
  * @author David Raison <david@ion.lu>
  * @package TracIntegration
- * @version 0.4
+ * @version 0.5
  * @since 0.1
  * @copyright ION Development (www.iongroup.lu)
  * @license http://www.gnu.org/copyleft/gpl.html GPL License 2 or later
