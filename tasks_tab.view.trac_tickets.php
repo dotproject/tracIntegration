@@ -1,8 +1,8 @@
 <?php
 /**
- * $Id$
+ * $Id: tasks_tab.view.trac_tickets.php,v 1.3 2008/04/30 12:50:43 david_iondev Exp $
  * @since 0.3
- * @version 0.3
+ * @version 0.5
  * @package dpTrac
  * @copyright ION Development (www.iongroup.lu)
  * @license http://www.gnu.org/copyleft/gpl.html GPL License 2 or later
@@ -40,18 +40,30 @@ if (!$env){
 ?>
 <div style="border:2px solid black;">
 <p><strong>Attached Trac Tickets</strong><br/>
-<table><thead><tr><th>Ticket #</th><th>Summary</th><th colspan="2">Actions</th></tr></thead>
+<table><thead><tr><th>Ticket #</th><th>Summary</th><th>Type</th><th>Priority</th></tr></thead>
 <tbody>
 <?php
 	if($task_project && $task_id){
 		// fetch host and environment
 		$env = $tracticket->fetchEnvironments($task_project);
-		// fetch ticket numbers
-		$tickets = $tracticket->fetchTickets($task_id);
+				
+		// does this env support xmlrpc?
+		if ($env['dtrpc']){
+			try {
+				$txrpc = new CTracRPC($env);
+				$tickets = $txrpc->fetchTickets($task_id);
+			} catch (Exception $e) {
+				$AppUI->setMsg('Remote procedure call failed: '.$e->getMessage());
+				$tickets = $tracticket->fetchTickets($task_id);	// get them without xmlrpc data then
+			}
+		} else
+			$tickets = $tracticket->fetchTickets($task_id);
+		
 		foreach($tickets as $ticket){
+			$color = ($color == 'white') ? 'transparent' : 'white';
 			$url = '?m=trac&envId='.$env['idenvironment'].'&ticket='.$ticket['fiticket'];
-			printf('<tr><td><a href="%1$s">#%2$s</a></td><td>%3$s</td>'
-					.'</tr>',$url,$ticket['fiticket'],$ticket['dtsummary'],$ticket['idticket']);
+			printf('<tr style="background-color:'.$color.';"><td><a href="%1$s">#%2$d</a></td><td>%3$s</td><td>%4$s</td><td>%5$s</td>'
+					.'</tr>',$url,$ticket['fiticket'],$ticket['dtsummary'],$ticket['type'],$ticket['priority']);
 		}
 	}
 ?>

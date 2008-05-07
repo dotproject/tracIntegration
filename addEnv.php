@@ -1,6 +1,6 @@
 <?php
 /**
- * $Id: addEnv.php,v 1.10 2008/05/06 21:24:53 david_iondev Exp $
+ * $Id: addEnv.php,v 1.11 2008/05/07 11:45:15 david_iondev Exp $
  * Trac integration for dotProject
  * 
  * This file has 2 roles:
@@ -53,8 +53,6 @@ if(($project_id = dPgetParam($_REQUEST,'project_id')) != '' && $canAdd){
 		if ($tracpr->addEnvironment($newenv,$project_id,$hasrpc))
 			$AppUI->setMsg('Environment added',UI_MSG_OK);
 	}
-	
-	
 		
 	// Save new host (first check if there has been a change at all)
 	$existHost = dPgetParam($_REQUEST,'existURL',0);

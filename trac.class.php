@@ -1,6 +1,6 @@
 <?php
 /**
- * $Id: trac.class.php,v 1.10 2008/05/06 21:24:53 david_iondev Exp $ 
+ * $Id: trac.class.php,v 1.11 2008/05/07 11:45:15 david_iondev Exp $ 
  * This class contains all methods used by the dpTrac module
  *
  * @author David Raison <david@ion.lu>
@@ -43,6 +43,14 @@ class CTracIntegrator {
 		$q->prepare();
 		$res = ($project_id) ? $q->loadHash() : $q->loadHashList('idenvironment');
 		return($res);
+	}
+	
+	/** 
+	 * fetch an environments name by supplying its ID
+	 * @param $envId
+	 * @return The environments Name (or Path)
+	 * */
+	public function fetchEnvNameFromId($envId){
 	}
 
 	/**
@@ -247,16 +255,16 @@ class CTracIntegrator {
 
 	/**
 	 * Get the host that hosts the given environment
-	 * @param $env The environment for which we want to find out its host
+	 * @param $envId The environment for which we want to find out its host
 	 * @return The url of the host that hosts the environment $env
 	 */
-	public function getHostFromEnvironment($env){
+	public function getHostFromEnvironment($envId){
 		$q = new DBQuery();
 		$q->addTable('trac_environment','e');
 		$q->addJoin('trac_host2project', 'h2p', 'h2p.fiproject = e.fiproject');
 		$q->addJoin('trac_host', 'h', 'h2p.fihost = h.idhost');
 		$q->addQuery('h.dthost');
-		$q->addWhere('e.idenvironment = '.$env);
+		$q->addWhere('e.idenvironment = '.$envId);
 		$q->prepare();
 		$res = $q->loadResult();
 		$q->clear();
@@ -265,16 +273,16 @@ class CTracIntegrator {
 
 	/**
 	 * Get Environments associated with given host
-	 * @param $host The host for which environments ought to be looked up
+	 * @param $hostid The host for which environments ought to be looked up
 	 * @return An array of environments which live under the given host
 	 */
-	public function getEnvironmentsFromHost($host){
+	public function getEnvironmentsFromHost($hostid){
 		$q = new DBQuery();
 		$q->addTable('trac_environment','e');
 		$q->addJoin('trac_host2project', 'h2p', 'h2p.fiproject = e.fiproject');
 		$q->addJoin('trac_host', 'h', 'h2p.fihost = h.idhost');
 		$q->addQuery('e.idenvironment,e.dtenvironment');
-		$q->addWhere('h.idhost = '.$host);
+		$q->addWhere('h.idhost = '.$hostid);
 		$q->prepare();
 		$res = $q->loadList();
 		$q->clear();
@@ -358,6 +366,80 @@ class CTracTicket extends CTracIntegrator{
 		$q->clear();
 		return true;
 	}
+}
 
+/**
+ * This class connects to your trac environment via an xml remote procedure call to fetch information.
+ */
+class CTracRPC extends CTracTicket{
+
+	protected $xrclient;
+	
+	/**
+	 * Set up an xmlrpc client
+	 * */
+	public function __construct($environment){
+		require_once "xmlrpc/lib/xmlrpc.inc";
+		$host = $this->getHostFromEnvironment($environment['idenvironment']);
+		$this->xrclient = $this->_connect($host,$environment);
+	}
+	
+	/**
+	 * Connect to an xmlrpc server
+	 * @param $host
+	 * @param $env
+	 * @return a handle to the xmlrpc client
+	 * */
+	private function _connect($host,$env){
+		// we need to break up the url for this
+		$urlparts = parse_url($host);
+		$protocol = $urlparts['scheme'];
+		$port = ($protocol == 'https') ? 443 : 80;
+		$fqdn = $urlparts['host'];
+		$environment = (substr($env['dtenvironment'],-1) == '/') ? $env['dtenvironment'] : $env['dtenvironment'].'/';
+		$script = $urlparts['path'].$environment.'login/xmlrpc';
+		$client =  new xmlrpc_client($script,$fqdn,$port,$protocol);
+		
+		// stuff that could be configured by the user
+		$client->setSSLVerifyPeer(false);
+		$client->setDebug(0);
+		$client->return_type = 'phpvals';	// return some data we can work with
+		return($client);
+		
+		/**
+		 * Stuff that doesn't seem to work :(
+		 * 
+		//$client->setCredentials('user','pass'); // doesn't work either :(
+		// auth doesn't seem to work :( Enabled XML_RPC for anon
+		//$xmlrpc_client = new xmlrpc_client('https://user:pass@host/script');
+		
+		* */
+	}
+	
+	private function _queryServer($msg){
+		$resp = $this->xrclient->send($msg);
+		if($resp == False) throw new Exception($resp->faultString(),$resp->faultCode());
+		if(!$resp->faultCode()) return($resp->value()); //return($resp->serialize()); 
+	}
+	
+	private function _createMsg($function,$vtPair){
+		return(new xmlrpcmsg($function,array(new xmlrpcval($vtPair['value'],$vtPair['type']))));
+	}
+	
+	/**
+	 * Overloading fetchTickets() from CTracTicket class
+	 */
+	public function fetchTickets($task_id){
+		// fetch standard info from the DB
+		$tickets = parent::fetchTickets($task_id);
+		// but get more information through xmlrpc
+		foreach($tickets as &$ticket){
+			$response = $this->_queryServer($this->_createMsg('ticket.get',array('value' => $ticket['fiticket'],'type' => 'int')));
+			$ticket['dtsummary'] = $response[3]['summary'];
+			$ticket['type'] = $response[3]['type'];
+			$ticket['priority'] = $response[3]['priority'];
+		}
+		return($tickets);
+	}
 }
 ?>

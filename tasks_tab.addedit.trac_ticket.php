@@ -1,8 +1,8 @@
 <?php
 /**
- * $Id: tasks_tab.addedit.trac_ticket.php,v 1.2 2008/04/30 12:50:43 david_iondev Exp $
+ * $Id: tasks_tab.addedit.trac_ticket.php,v 1.3 2008/05/02 11:59:11 david_iondev Exp $
  * @since 0.3
- * @version 0.3
+ * @version 0.5
  * @package dpTrac
  * @copyright ION Development (www.iongroup.lu)
  * @license http://www.gnu.org/copyleft/gpl.html GPL License 2 or later
@@ -61,6 +61,10 @@ if(!$canAdd){
 		$env = $tracticket->fetchEnvironments($task_project);
 		// fetch ticket numbers
 		$tickets = $tracticket->fetchTickets($task_id);
+		/** NEW & TODO
+		 * 1. If an environment has rpc support, do NOT offer a summary field, but say that we're going to retrieve it from the trac
+		 * 2. Also offer a drop-down box with the environments open tickets to select from
+		 */
 		foreach($tickets as $ticket){
 			$url = '?m=trac&envId='.$env['idenvironment'].'&ticket='.$ticket['fiticket'];
 			printf('<tr><td><a href="%1$s">#%2$d</a></td>'
