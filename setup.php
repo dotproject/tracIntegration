@@ -137,7 +137,8 @@ class CSetupTrac {
 					`fiproject` SMALLINT NOT NULL ,
 					`fihost` SMALLINT NOT NULL ,
 					PRIMARY KEY ( `idhost2project` ) ,
-					INDEX ( `fiproject` , `fihost` )
+					UNIQUE KEY `fiproject_2` (`fiproject`),
+					KEY `ixh2p` ( `fiproject` , `fihost` )
 					) ENGINE = MYISAM CHARACTER SET utf8 COLLATE utf8_unicode_ci;';
 		$q->createTable('trac_host2project');
 		$q->createDefinition($sql);

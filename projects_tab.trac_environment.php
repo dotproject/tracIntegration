@@ -1,6 +1,6 @@
 <?php
 /**
- * $Id: projects_tab.trac_environment.php,v 1.4 2008/05/02 14:10:37 david_iondev Exp $
+ * $Id: projects_tab.trac_environment.php,v 1.5 2008/05/06 21:24:53 david_iondev Exp $
  * This tab extends the projects module with options to work with the tracIntegration module
  * It checks whether there is a trac environment for the currently selected project
  * @author David Raison <david@ion.lu>
@@ -13,6 +13,7 @@
 if (!defined('DP_BASE_DIR')){
 	die('You should not access this file directly.');
 }
+define('XMLRPCHP','http://trac-hacks.org/wiki/XmlRpcPlugin');
 // load our class
 require_once $AppUI->getModuleClass('trac');
 $tracProj = new CTracIntegrator();
@@ -47,22 +48,27 @@ if (!empty($myhost) && !empty($environment) && $reconfigure == NULL) {
 			<td><select class="text" name="existURL">
 			<option value="0">Pick a host</option>';
 	     	// generate options for the select box
-	    if (!empty($myhost)) $AppUI->setState('oldhost',$myhost['dthost']);	// we will need this later when checking for changes to the setup
+	    if (!empty($myhost)) $AppUI->setState('oldhost',$myhost['idhost']);	// we will need this later when checking for changes to the setup
    		foreach($hosts as $host){
 			$selected = ($host['fiproject'] == $project_id) ? 'selected' : 'false';
-			$out .= sprintf('<option value="%1$s" selected="%2$s">%1$s</option>',$host['dthost'],$selected);
+			$out .= sprintf('<option value="%1$d" selected="%3$s">%2$s</option>',$host['idhost'],$host['dthost'],$selected);
 		}
 	    $out .= '</select>&nbsp;or:&nbsp;</td></tr>';
     }	// !empty($hosts)
     // add a text field to add new hosts
     $env = $tracProj->fetchEnvironments($project_id);
+    $enabled = ($env['dtrpc']) ? 'checked="checked"' : '';
     $AppUI->setState('oldenv',$env['dtenvironment']);
+    $AppUI->setState('oldrpc',$env['dtrpc']);
    	$out .= '<tr><td><label for="newurl">Enter a new host</label></td>
-			<td><input class="text" id="tracurl" name="newurl" type="text" size="40"/>
-			</td></tr><tr><td><label for="newenv">Trac Environment</label></td>
-			<td><input id="tracenv" class="text" name="newenv" type="text" size="40" value="'.$env['dtenvironment'].'"/></td></tr>
+			<td><input class="text" id="tracurl" name="newurl" maxlength="60" type="text" size="50"/></td></tr>
+			<tr><td><label for="newenv">Trac Environment</label></td>
+			<td><input id="tracenv" class="text" name="newenv" type="text" maxlength="60" size="50" value="'.$env['dtenvironment'].'"/></td></tr>
+			<tr><td><label for="hasrpc">XML-RPC support</label></td>
+			<td><input id="hasrpcCheck" name="hasrpc" value="1" '.$enabled.' type="checkbox"/>
+			&nbsp;does this environment have the <a style="text-decoration:underline;" href="'.XMLRPCHP.'">XmlRpcPlugin</a> installed?</td>
 			<tr><td colspan="2" style="text-align:right;"><button class="button" name="submit" value="saveTracConf" title="Click to Save">Save</button></td></tr>
 			</tbody></table></form>';
 	print($out);
-	}
+}
 ?>

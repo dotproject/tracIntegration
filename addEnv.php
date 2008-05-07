@@ -1,6 +1,6 @@
 <?php
 /**
- * $Id: addEnv.php,v 1.9 2008/05/02 14:10:37 david_iondev Exp $
+ * $Id: addEnv.php,v 1.10 2008/05/06 21:24:53 david_iondev Exp $
  * Trac integration for dotProject
  * 
  * This file has 2 roles:
@@ -42,36 +42,40 @@ $tracpr = new CTracIntegrator();
 if(($project_id = dPgetParam($_REQUEST,'project_id')) != '' && $canAdd){
 	// Save environments
 	if ($oldenv = $AppUI->getState('oldenv')) $AppUI->setState('oldenv',false);	// resetting
+	if ($oldrpc = $AppUI->getState('oldrpc')) $AppUI->setState('oldrpc',0);	// resetting
 	$newenv = dPgetParam($_REQUEST,'newenv',0);
-	if ($oldenv && $newenv && $newenv != $oldenv){	// that's an update
-		if ($tracpr->updateEnvironment($newenv,$project_id))
+	$hasrpc = dPgetParam($_REQUEST,'hasrpc',0);
+		
+	if ($oldenv && $newenv && ($newenv != $oldenv || $hasrpc != $oldrpc)){	// that's an update (of either the environment name or its rpc state)
+		if ($tracpr->updateEnvironment($newenv,$project_id,$hasrpc))
 			$AppUI->setMsg('Environment updated',UI_MSG_OK);
 	} elseif($newenv && !$oldenv) {	// new environment
-		if ($tracpr->addEnvironment($newenv,$project_id))
+		if ($tracpr->addEnvironment($newenv,$project_id,$hasrpc))
 			$AppUI->setMsg('Environment added',UI_MSG_OK);
 	}
+	
+	
 		
 	// Save new host (first check if there has been a change at all)
 	$existHost = dPgetParam($_REQUEST,'existURL',0);
 	if ($oldhost = $AppUI->getState('oldhost')) $AppUI->setState('oldhost',false);	// resetting
-	//var_dump($oldhost,$existHost,($oldhost == $existHost),$tracpr->fetchHosts($project_id)); exit;
 	if (($newurl = dPgetParam($_REQUEST,'newurl')) != ''){
-		// if a new hosts has been set, then add that.
+		// if a new hosts has been set, then add that one.
 		try {
 			$host_id = $tracpr->addHost($newurl);
-			$tracpr->addHostLink($host_id,$project_id);
-			$AppUI->setMsg('Host added',UI_MSG_OK);
+			$tracpr->setHostLink($host_id,$project_id,$oldhost);
+			$AppUI->setMsg('New host added',UI_MSG_OK);
 		} catch (Exception $e) {
 			$AppUI->setMsg('Host not added, exception: '.$e->getMessage(),UI_MSG_ERROR);
 		}
-	} elseif ($existHost && $existHost != 'Pick a host' && ($existHost != $oldhost || !$tracpr->fetchHosts($project_id))){
+	} elseif ($existHost && $existHost != '0' && ($existHost != $oldhost || !$tracpr->fetchHosts($project_id))){
 		/* then the user has selected a new host from the select box.
 		 * @attention NEW can also mean that this project didn't have any host set so far.
 		 * @attention ($existHost != $oldhost) can also evaluate to TRUE if oldhost is not set.
-		 * We only need to add a link in this case.
+		 * We only need to add or change a link in this case.
 		 */
-		if($tracpr->addHostLink($existHost,$project_id))
-			$AppUI->setMsg('Host added',UI_MSG_OK);
+		if($tracpr->setHostLink($existHost,$project_id,$oldhost))
+			$AppUI->setMsg('Host link added',UI_MSG_OK);
 		else
 			$AppUI->setMsg('Host not added',UI_MSG_ERROR);
 	} else

@@ -1,6 +1,6 @@
 <?php
 /**
- * $Id: trac.class.php,v 1.9 2008/05/02 14:10:37 david_iondev Exp $ 
+ * $Id: trac.class.php,v 1.10 2008/05/06 21:24:53 david_iondev Exp $ 
  * This class contains all methods used by the dpTrac module
  *
  * @author David Raison <david@ion.lu>
@@ -37,7 +37,7 @@ class CTracIntegrator {
 	public function fetchEnvironments($project_id=0){
 		$q = new DBQuery();
 		$q->addTable('trac_environment');
-		$q->addQuery('idenvironment, dtenvironment');
+		$q->addQuery('idenvironment, dtenvironment, dtrpc');
 		if($project_id)
 			$q->addWhere("fiproject = '$project_id'");
 		$q->prepare();
@@ -77,10 +77,10 @@ class CTracIntegrator {
 	 * @param $project_id The id of the project this new environment is to be associated with.
 	 * @return A boolean value depending on the success of the operation
 	 */
-	public function addEnvironment($env,$project_id){
+	public function addEnvironment($env,$project_id,$rpc){
 		$q = new DBQuery();
 		$q->addTable('trac_environment');
-		$q->addInsert(array('fiproject','dtenvironment'),array($project_id,$env),true);
+		$q->addInsert(array('fiproject','dtenvironment','dtrpc'),array($project_id,$env,$rpc),true);
 		if (!($q->exec())) {
 			return db_error();
 		}
@@ -94,10 +94,10 @@ class CTracIntegrator {
 	 * @param $project_id The id of the project this new environment is associated with.
 	 * @return A boolean value depending on the success of the operation
 	 */
-	public function updateEnvironment($env,$project_id){
+	public function updateEnvironment($env,$project_id,$rpc){
 		$q = new DBQuery();
 		$q->addTable('trac_environment');
-		$q->addUpdate('dtenvironment',$env);
+		$q->addUpdate(array('dtenvironment','dtrpc'),array($env,$rpc),true);
 		$q->addWhere('fiproject = '.$project_id);
 		if (!($q->exec())) {
 			return db_error();
@@ -178,12 +178,18 @@ class CTracIntegrator {
 	 * Add a host<-->project link to the host2project table
 	 * @param $host_id
 	 * @param $project_id
+	 * @param $hashost If this project already had a hostentry, update the table instead of inserting a new entry
 	 * @return bool
 	 */
-	public function addHostLink($host_id,$project_id){
+	public function setHostLink($host_id,$project_id,$hashost){
 		$q = new DBQuery();
 		$q->addTable('trac_host2project');
-		$q->addInsert(array('fihost','fiproject'),array($host_id,$project_id),true);
+		if (!$hashost)
+			$q->addInsert(array('fihost','fiproject'),array($host_id,$project_id),true);
+		else {
+			$q->addUpdate('fihost',$host_id);
+			$q->addWhere('fiproject',$project_id);
+		}
 		if (!$q->exec()) {
 			return db_error();
 		}
