@@ -1,6 +1,6 @@
 <?php
 /**
- * $Id: trac.class.php,v 1.11 2008/05/07 11:45:15 david_iondev Exp $ 
+ * $Id: trac.class.php,v 1.12 2008/05/07 14:07:56 david_iondev Exp $ 
  * This class contains all methods used by the dpTrac module
  *
  * @author David Raison <david@ion.lu>
@@ -379,7 +379,7 @@ class CTracRPC extends CTracTicket{
 	 * Set up an xmlrpc client
 	 * */
 	public function __construct($environment){
-		require_once "xmlrpc/lib/xmlrpc.inc";
+		require_once "xrlib/xmlrpc.inc";
 		$host = $this->getHostFromEnvironment($environment['idenvironment']);
 		$this->xrclient = $this->_connect($host,$environment);
 	}
