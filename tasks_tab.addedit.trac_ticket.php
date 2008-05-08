@@ -1,6 +1,6 @@
 <?php
 /**
- * $Id: tasks_tab.addedit.trac_ticket.php,v 1.3 2008/05/02 11:59:11 david_iondev Exp $
+ * $Id: tasks_tab.addedit.trac_ticket.php,v 1.4 2008/05/07 14:07:56 david_iondev Exp $
  * @since 0.3
  * @version 0.5
  * @package dpTrac
@@ -53,7 +53,7 @@ if(!$canAdd){
 <p><strong>Attached Trac Tickets</strong><br/>
 <form name="tracTicketAttach" method="post" action="?m=trac&a=ticket_backend">
 <input type="hidden" name="task_id" value="<?php echo $task_id ?>"/>
-<table><thead><tr><th>Ticket #</th><th>Summary</th><th colspan="2">Actions</th></tr></thead>
+<table><thead><tr><th>Ticket #</th><th>Summary (displayed only if xmlrpc is not available)</th><th colspan="2">Actions</th></tr></thead>
 <tbody>
 <?php
 	if($task_project && $task_id){
@@ -62,7 +62,6 @@ if(!$canAdd){
 		// fetch ticket numbers
 		$tickets = $tracticket->fetchTickets($task_id);
 		/** NEW & TODO
-		 * 1. If an environment has rpc support, do NOT offer a summary field, but say that we're going to retrieve it from the trac
 		 * 2. Also offer a drop-down box with the environments open tickets to select from
 		 */
 		foreach($tickets as $ticket){
@@ -83,21 +82,19 @@ if(!$canAdd){
 		}
 	}
 // 2. add an empty row to attach a new ticket (num [textbox 5], summary [textbox 50], attach [button]) 
-?>
-<tr>
-<td>#<input type="text" class="text" name="ticketnum" maxlength="5" style="width:5em;"/></td>
-<td><input type="text" class="text" name="newsummary" maxlength="50" style="width:50em;"/></td>
-<td><button name="addticket" id="attachButton" style="background-color:transparent;border:0px;" value="yes" title="<?php echo $AppUI->_('Click to attach this ticket'); ?>">
-<?php
-print(dPshowImage( './images/icons/stock_attach-16.png', '16', '16',  '' ));
-?>
-</button></td>
-</tr>
-</table>
-</form>
-</p>
-</div>
-<?php
+print('<tr>');
+if ($env['dtrpc']) {	
+	// fetch all tickets and offer them in a drop-down select box
+	$tracrpc = new CTracRPC($env);
+	$options = 0;
+	foreach($tracrpc->fetchTicketList() as $ticket)
+		$options .= sprintf('<option value="%1$d">%1$d</option>',$ticket);
+	print('<td>#<select name="ticketnum" class="text" style="width:5em;">'.$options.'</select></td>');
+} else {
+	print('<td>#<input type="text" class="text" name="ticketnum" maxlength="5" style="width:5em;"/></td>');
+}
+print('<td><input type="text" class="text" name="newsummary" maxlength="50" style="width:50em;"/></td>');
+print('<td><button name="addticket" id="attachButton" style="background-color:transparent;border:0px;" value="yes" title="'.$AppUI->_('Click to attach this ticket').'">');
+print(dPshowImage( './images/icons/stock_attach-16.png', '16', '16',  '' ).'</button>');
+print('</td></tr></table></form></p></div>');
 
-return;
-?>

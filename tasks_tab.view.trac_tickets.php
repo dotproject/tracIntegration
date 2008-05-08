@@ -1,6 +1,6 @@
 <?php
 /**
- * $Id: tasks_tab.view.trac_tickets.php,v 1.3 2008/04/30 12:50:43 david_iondev Exp $
+ * $Id: tasks_tab.view.trac_tickets.php,v 1.4 2008/05/07 14:07:56 david_iondev Exp $
  * @since 0.3
  * @version 0.5
  * @package dpTrac
@@ -40,7 +40,7 @@ if (!$env){
 ?>
 <div style="border:2px solid black;">
 <p><strong>Attached Trac Tickets</strong><br/>
-<table><thead><tr><th>Ticket #</th><th>Summary</th><th>Type</th><th>Priority</th></tr></thead>
+<table style="border:1px solid black;width:100%"><thead><tr><th>Ticket #</th><th>Summary</th><th>Type</th><th>Priority</th></tr></thead>
 <tbody>
 <?php
 	if($task_project && $task_id){
@@ -62,7 +62,7 @@ if (!$env){
 		foreach($tickets as $ticket){
 			$color = ($color == 'white') ? 'transparent' : 'white';
 			$url = '?m=trac&envId='.$env['idenvironment'].'&ticket='.$ticket['fiticket'];
-			printf('<tr style="background-color:'.$color.';"><td><a href="%1$s">#%2$d</a></td><td>%3$s</td><td>%4$s</td><td>%5$s</td>'
+			printf('<tr style="background-color:'.$color.';"><td><a href="%1$s">#%2$d</a></td><td><a href="%1$s">%3$s</a></td><td>%4$s</td><td>%5$s</td>'
 					.'</tr>',$url,$ticket['fiticket'],$ticket['dtsummary'],$ticket['type'],$ticket['priority']);
 		}
 	}

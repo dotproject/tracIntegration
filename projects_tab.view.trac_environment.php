@@ -1,6 +1,6 @@
 <?php
 /**
- * $Id: projects_tab.trac_environment.php,v 1.5 2008/05/06 21:24:53 david_iondev Exp $
+ * $Id: projects_tab.trac_environment.php,v 1.6 2008/05/07 11:45:15 david_iondev Exp $
  * This tab extends the projects module with options to work with the tracIntegration module
  * It checks whether there is a trac environment for the currently selected project
  * @author David Raison <david@ion.lu>
@@ -30,11 +30,23 @@ $reconfigure = dPgetParam($_REQUEST, 'trac_configure', NULL);
 // check if a host has been defined for this module
 if (!empty($myhost) && !empty($environment) && $reconfigure == NULL) { 
 	$env = $tracProj->fetchEnvironments($project_id);
- 	print('<div style="padding:5px;width:50%;">'
- 			.'<a href="?m=trac&envId='.$env['idenvironment'].'">Go to <strong>'.$env['dtenvironment'].'</strong> trac environment.</a>&nbsp;'
- 			.'<a href="?m=projects&a=view&project_id='.$project_id.'&tab='.$tab.'&trac_configure=true">'
- 			.dPshowImage( './images/icons/stock_edit-16.png', '16', '16',  '' )
- 			.'</a></div>');
+ 	print('<table style="border:1px solid black;width:70%;"><tr>'
+ 		.'<th>Link:</th><td><a href="?m=trac&envId='.$env['idenvironment'].'">'
+ 		.'Go to <strong>'.$env['dtenvironment'].'</strong> trac environment.</a></td>'
+ 		.'<th>Configure:</th><td><a href="?m=projects&a=view&project_id='.$project_id.'&tab='.$tab.'&trac_configure=true">'
+ 		.dPshowImage( './images/icons/stock_edit-16.png', '16', '16',  '' )
+ 		.'</a></td></tr>');
+ 	if($env['dtrpc']){
+ 		$tracrpc = new CTracRPC($env);
+ 		$open = $tracrpc->getTotalOpenTickets();
+ 		$milestones = $tracrpc->fetchMilestones();
+ 		$components = $tracrpc->fetchComponents();
+ 		print('<tr><th colspan="4" style="border-top:1px dashed black;background-color:white;">Additional data supplied by XMLRPC</th></tr>'
+ 			.'<tr><th colspan="2">Total of open tickets:</th><td colspan="2">'.$open.'</td></tr>'
+ 			.'<tr><th>Milestones:</th><td>'.implode('<br/>',$milestones).'</td>'
+ 			.'<th>Components:</th><td>'.implode('<br/>',$components).'</td></tr>');
+ 	}
+ 	print('</table>');
 } elseif (empty($myhost) || empty($environment) || $reconfigure == "true"){ // if no host found or configuration request, offer a form:
 	$hosts = $tracProj->fetchHosts();
 	$out = '<p>If there is a trac environment available for this project, please select or enter the URL 
@@ -48,10 +60,10 @@ if (!empty($myhost) && !empty($environment) && $reconfigure == NULL) {
 			<td><select class="text" name="existURL">
 			<option value="0">Pick a host</option>';
 	     	// generate options for the select box
-	    if (!empty($myhost)) $AppUI->setState('oldhost',$myhost['dthost']);	// we will need this later when checking for changes to the setup
+	    if (!empty($myhost)) $AppUI->setState('oldhost',$myhost['idhost']);	// we will need this later when checking for changes to the setup
    		foreach($hosts as $host){
 			$selected = ($host['fiproject'] == $project_id) ? 'selected' : 'false';
-			$out .= sprintf('<option value="%1$s" selected="%2$s">%1$s</option>',$host['dthost'],$selected);
+			$out .= sprintf('<option value="%1$d" selected="%3$s">%2$s</option>',$host['idhost'],$host['dthost'],$selected);
 		}
 	    $out .= '</select>&nbsp;or:&nbsp;</td></tr>';
     }	// !empty($hosts)
@@ -59,6 +71,7 @@ if (!empty($myhost) && !empty($environment) && $reconfigure == NULL) {
     $env = $tracProj->fetchEnvironments($project_id);
     $enabled = ($env['dtrpc']) ? 'checked="checked"' : '';
     $AppUI->setState('oldenv',$env['dtenvironment']);
+    $AppUI->setState('oldrpc',$env['dtrpc']);
    	$out .= '<tr><td><label for="newurl">Enter a new host</label></td>
 			<td><input class="text" id="tracurl" name="newurl" maxlength="60" type="text" size="50"/></td></tr>
 			<tr><td><label for="newenv">Trac Environment</label></td>

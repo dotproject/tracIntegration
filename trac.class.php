@@ -1,6 +1,6 @@
 <?php
 /**
- * $Id: trac.class.php,v 1.12 2008/05/07 14:07:56 david_iondev Exp $ 
+ * $Id: trac.class.php,v 1.13 2008/05/08 09:17:32 david_iondev Exp $ 
  * This class contains all methods used by the dpTrac module
  *
  * @author David Raison <david@ion.lu>
@@ -422,8 +422,8 @@ class CTracRPC extends CTracTicket{
 		if(!$resp->faultCode()) return($resp->value()); //return($resp->serialize()); 
 	}
 	
-	private function _createMsg($function,$vtPair){
-		return(new xmlrpcmsg($function,array(new xmlrpcval($vtPair['value'],$vtPair['type']))));
+	private function _createMsg($function,$vtPair=false){
+		return ($vtPair === false) ? new xmlrpcmsg($function) : new xmlrpcmsg($function,array(new xmlrpcval($vtPair['value'],$vtPair['type'])));
 	}
 	
 	/**
@@ -440,6 +440,26 @@ class CTracRPC extends CTracTicket{
 			$ticket['priority'] = $response[3]['priority'];
 		}
 		return($tickets);
+	}
+	
+	public function fetchTicketList(){
+		$res = $this->_queryServer($this->_createMsg('ticket.query',array('value'=>'status!=closed','type' => 'string')));
+		return($res);
+	}
+	
+	public function getTotalOpenTickets(){
+		$tickets = $this->fetchTicketList();
+		return(sizeof($tickets));
+	}
+	
+	public function fetchMilestones(){
+		$res = $this->_queryServer($this->_createMsg('ticket.milestone.getAll'));
+		return($res);
+	}
+	
+	public function fetchComponents(){
+		$res = $this->_queryServer($this->_createMsg('ticket.component.getAll'));
+		return($res);
 	}
 }
 ?>
