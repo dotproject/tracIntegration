@@ -32,7 +32,7 @@ class CSetupTrac {
 		$q = new DBQuery;
 		$this->_runBasicInstall($q);
 		$this->_addTicketTable($q);
-		$this->_addHost2ProjectTable();
+		$this->_addHost2ProjectTable($q);
 		return db_error();
 	}
 
